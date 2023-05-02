@@ -1,0 +1,21 @@
+services:
+    concrete_finishers.print_builder:
+      class: Drupal\concrete_finishers\PrintBuilder
+      arguments: ['@concrete_finishers.renderer_factory', '@event_dispatcher', '@string_translation']
+
+    concrete_finishers.renderer_factory:
+      class: Drupal\concrete_finishers\Renderer\RendererFactory
+      calls:
+        - [setContainer, ['@service_container']]
+
+    concrete_finishers.renderer.content:
+      class: Drupal\concrete_finishers\Renderer\ContentEntityRenderer
+      arguments: ['@renderer', '@concrete_finishers.asset_renderer', '@event_dispatcher', '@entity_type.manager']
+
+    concrete_finishers.asset_renderer:
+        class: Drupal\concrete_finishers\Asset\AssetRenderer
+        arguments: ['@asset.resolver', '@asset.css.collection_renderer', '@concrete_finishers.asset_collector']
+
+    concrete_finishers.asset_collector:
+        class: Drupal\concrete_finishers\Asset\AssetCollector
+        arguments: ['@theme_handler', '@info_parser', '@event_dispatcher']

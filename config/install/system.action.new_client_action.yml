@@ -1,0 +1,9 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+id: new_client_action
+label: 'Take action after a new client is created'
+type: node
+plugin: new_client_action

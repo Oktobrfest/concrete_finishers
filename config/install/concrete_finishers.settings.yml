@@ -1,0 +1,16 @@
+docusign:
+  username: 'xxx@xxxxxxxxx.com'
+  password: 'xxxxxxxxx'
+  integrator_key: 'xxxxxxxxx'
+  host: 'https://na2.docusign.net/restapi'
+
+authorize:
+  login_id: 'xxxxxxxxx'
+  transaction_key: 'xxxxxxxxx'
+
+tsheets:
+  oauth_client_id: 'xxxxxxxxx'
+  oauth_client_secrete: 'xxxxxxxxx'
+  base_url: 'https://rest.tsheets.com/api/v1'
+  auth_endpoint: '/authorize'
+

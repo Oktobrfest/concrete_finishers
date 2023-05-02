@@ -1,0 +1,362 @@
+<?php
+
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Drupal\concrete_finishers\Task;
+
+/**
+ * Implements hook_theme().
+ */
+function concrete_finishers_theme($existing, $type, $theme, $path)
+{
+    return [
+        'estimate_proposal_print' => [
+            'path' => $path . '/templates',
+            'template' => 'estimate_proposal-print',
+            'variables' => [
+                'title' => '',
+                'content' => null,
+                'entity_print_css' => null,
+                'preview' => null,
+                'print' => null,
+                'admin' => null,
+                'entity_id' => null,
+            ],
+        ],
+        'invoice_print' => [
+            'path' => $path . '/templates',
+            'template' => 'invoice-print',
+            'variables' => [
+                'title' => '',
+                'content' => null,
+                'entity_print_css' => null,
+                'preview' => null,
+                'print' => null,
+                'admin' => null,
+                'entity_id' => null,
+            ],
+        ],
+        'entity_print' => [
+            'path' => $path . '/templates',
+            'template' => 'entity-print',
+            'variables' => [
+                'title' => '',
+                'content' => null,
+                'entity_print_css' => null,
+                'preview' => null,
+                'print' => null,
+                'admin' => null,
+                'entity_id' => null,
+            ],
+        ],
+        'invoice_mail' => [
+            'path' => $path . '/templates',
+            'template' => 'invoice-mail',
+            'variables' => [
+                'content' => null,
+            ],
+        ],
+    ];
+}
+
+function concrete_finishers_mail($key, &$message, $params)
+{
+    // Each message is associated with a language, which may or may not be the
+    // current user's selected language, depending on the type of e-mail being
+    // sent. This $options array is used later in the t() calls for subject
+    // and body to ensure the proper translation takes effect.
+    $options = [
+        'langcode' => $message['langcode'],
+    ];
+    $site_config = \Drupal::config('system.site');
+    $site_mail = \Drupal::config('system.site')->get('mail');
+    switch ($key) {
+        // Send a simple message from the contact form.
+        case 'client_proposal_notification':
+            $message['headers']['Content-Type'] = 'text/html; charset=UTF-8; format=flowed; delsp=yes';
+            $message['subject'] = t('Highlands Concrete Finishers Personal Service Proposal');
+            $message['body'][] = t('We have created your service proposal with a few options that best fit your concrete needs.');
+            $message['body'][] = t('Please visit <a href="@url">your proposal</a> to select your options and schedule your concrete service.',
+                ['@url' => $params]);
+            $message['body'][] = t('<br/><br/>HCF Team');
+            $message['body'][] = t('<br/>Phone: 303 835 8331');
+            $message['body'][] = t('<br/>Email: sales@concrete-finishers.com');
+            break;
+        case 'client_invoice_notification':
+            $message['headers']['Content-Type'] = 'text/html; charset=UTF-8; format=flowed; delsp=yes';
+            $message['subject'] = t('Highlands Concrete Finishers Invoice');
+            $message['body'][] = t('We have created an invoice for your concrete service.');
+            $message['body'][] = t('Please visit <a href="@url">your invoice</a> to view and pay your invoice.',
+                ['@url' => $params]);
+            $message['body'][] = t('<br/><br/>HCF Team');
+            $message['body'][] = t('<br/>Phone: 303 835 8331');
+            $message['body'][] = t('<br/>Email: sales@concrete-finishers.com');
+            break;
+        case 'client_invoice_receipt':
+            $message['subject'] = t('Highlands Concrete Finishers Invoice');
+            $message['headers']['Content-Type'] = 'text/html; charset=UTF-8; format=flowed; delsp=yes';
+            $message['body'][] = $params;
+            $message['body'][] = t('<br/><br/>HCF Team');
+            $message['body'][] = t('<br/>Phone: 303 835 8331');
+            $message['body'][] = t('<br/>Email: sales@concrete-finishers.com');
+            break;
+        case 'task_client_contract_signed':
+            $url = Url::fromRoute('entity.node.canonical',
+                ['node' => $params['id']],
+                ['absolute' => true]
+            )->toString();
+
+            $message['subject'] = t('@name has signed the contract',
+                ['@name' => $params['name']]);
+            $message['body'][] = t("Supplies needed: @supplies \n\nSquare Footage: @sqft \n\n@url",
+                [
+                    '@supplies' => $params['supplies'],
+                    '@sqft' => $params['sqft'],
+                    '@url' => $url,
+                ]);
+            break;
+    }
+}
+
+/**
+ * Implements hook_entity_operation().
+ */
+function concrete_finishers_entity_operation_alter(
+    array &$operations,
+    \Drupal\Core\Entity\EntityInterface $entity
+) {
+    $current_path = \Drupal::service('path.current')->getPath();
+
+    if ($entity->bundle() == 'task' && strpos($current_path,
+            'tasks') !== false) {
+        if ($entity->get('field_date_completed')->getValue()) {
+            $operations = [];
+            return;
+        }
+
+
+        try {
+            $term = \Drupal::entityTypeManager()
+                ->getStorage('taxonomy_term')
+                ->load($entity->get('field_phase')
+                    ->getValue(0)[0]['target_id']);
+
+            $class = '\\Drupal\\concrete_finishers\\Task\\Task'
+                . str_replace(" ", "", $term->name->value);
+            $task = new $class($entity);
+            $operations = $task->getOperations();
+
+            $operations['complete'] = [
+                'title' => t('Mark Completed'),
+                'url' => \Drupal\Core\Url::fromRoute('concrete_finishers.completeTask',
+                    ['entity_id' => $entity->id()]),
+                'weight' => 20,
+            ];
+            $operations['hide'] = [
+                'title' => t('Hide'),
+                'url' => \Drupal\Core\Url::fromRoute('concrete_finishers.hideTask',
+                    ['entity_id' => $entity->id()]),
+                'weight' => 100,
+            ];
+        } catch (Exception $e) {
+            \Drupal::logger('concrete_finishers')->error($e->getMessage());
+            drupal_set_message($e->getMessage(), 'error');
+        }
+
+
+    }
+}
+
+
+function concrete_finishers_node_postsave(
+    \Drupal\Core\Entity\EntityInterface $entity,
+    $op
+) {
+    if ($op == "update" || $op == "insert") {
+        if ($entity->bundle() == 'estimate_proposal') {
+            $client = new \Drupal\concrete_finishers\Client\Client(
+                $entity->get('field_client_reference')
+                    ->getValue(0)[0]['target_id']
+            );
+            //\Drupal::logger('client')->debug(print_r($client, true));
+            if ($client->getClient() && $client->getClient()->id()) {
+                $client->saveProposal($entity);
+            }
+        } elseif ($entity->bundle() == 'invoice') {
+            $client = new Drupal\concrete_finishers\Client\Client();
+            $client->saveInvoice($entity);
+        } elseif ($entity->bundle() == 'task' && $op == "insert") {
+            try {
+                $client = (new \Drupal\concrete_finishers\Client\Client(
+                    $entity->get('field_client_reference')
+                        ->getValue(0)[0]['target_id']
+                ))->getClient();
+                $client->field_tasks[] = $entity;
+                $client->save();
+            } catch (Exception $e) {
+
+            }
+        } elseif ($entity->bundle() == 'new_client_form' && $op == "insert") {
+            try {
+                $location = Drupal::entityTypeManager()
+                    ->getStorage('commerce_stock_location')
+                    ->create([
+                        'name' => $entity->title->value . ' '
+                            . $entity->field_project_address->value,
+                        'uid' => [0],
+                    ]);
+                if ($location->save()) {
+                    $entity->field_location->setValue($location->id());
+                    $entity->save();
+                    drupal_set_message('Location Created', 'debug');
+                }
+            } catch (Exception $e) {
+                \Drupal::logger('stock_location')->error($e->getMessage());
+                drupal_set_message($e->getMessage(), 'error');
+            }
+
+
+        }
+    }
+}
+
+
+function concrete_finishers_entity_type_build(array &$entity_types)
+{
+    $entity_types['node']->setFormClass('client_start_date_form',
+        'Drupal\node\NodeForm');
+    $entity_types['node']->setFormClass('client_completed_date_form',
+        'Drupal\node\NodeForm');
+    $entity_types['paragraph']->setFormClass('checklist_form',
+        'Drupal\Core\Entity\ContentEntityForm');
+    $entity_types['paragraph']->setFormClass('checklist_notes_form',
+        'Drupal\Core\Entity\ContentEntityForm');
+
+}
+
+
+function concrete_finishers_form_alter(
+    &$form,
+    \Drupal\Core\Form\FormStateInterface $form_state,
+    $form_id
+) {
+    //xdebug_var_dump($form_id)
+    if ($form_id == 'user_admin_settings') {
+        $mail_config = \Drupal::config('concrete_finishers.settings');
+        //var_dump($mail_config);exit();
+
+        $form['client_proposal_notification'] = [
+            '#type' => 'details',
+            '#title' => 'Client Proposal Notification Email',
+            '#description' => 'Edit the email template for notifying a client that their proposal is ready to be viewed' . ' ',
+            '#group' => 'email',
+        ];
+        $form['client_proposal_notification']['client_proposal_notification_subject'] = [
+            '#type' => 'textfield',
+            '#title' => 'Subject',
+            '#default_value' => "Highlands Concrete Finishers Personal Service Proposal",
+            '#maxlength' => 180,
+        ];
+        $form['client_proposal_notification']['client_proposal_notification_body'] = [
+            '#type' => 'textarea',
+            '#title' => 'Body',
+            '#default_value' => "We have created your service proposal with a few options that best fit your concrete needs.  \n\n Please visit [proposal:view-url] to select your options and schedule your concrete service. [site:name] team",
+            '#rows' => 15,
+        ];
+    } elseif ($form_id == 'paragraph_checklist_item_checklist_notes_form_form') {
+        $form['actions']['submit']['#attributes']['class'][] = 'use-ajax';;
+        $form['actions']['submit']['#attributes']['data-dialog-type'][] = 'modal';
+        $form['actions']['submit']['#ajax'] = [
+            'callback' => 'Drupal\concrete_finishers\Form\ChecklistButtonForm::ajaxNotesFormSubmit',
+            'event' => 'click',
+            'wrapper' => 'edit-output',
+            'progress' => [
+                'type' => 'throbber',
+                'message' => t('Saving'),
+            ],
+        ];
+    } elseif ($form_id == 'paragraph_checklist_item_checklist_form_form') {
+
+        $form['actions']['submit']['#attributes']['class'][] = 'use-ajax submit-btn';
+        $form['actions']['submit']['#attributes']['data-dialog-type'][] = 'modal';
+        $form['actions']['submit']['#ajax'] = [
+            'callback' => 'Drupal\concrete_finishers\Form\ChecklistCompleteForm::ajaxNotesFormSubmit',
+            'event' => 'click',
+            'wrapper' => 'edit-output',
+            'progress' => [
+                'type' => 'throbber',
+                'message' => t('Saving'),
+            ],
+        ];
+        if (empty($form['field_performed_by']['widget']['#default_value'])) {
+            $form['field_performed_by']['widget']['#default_value'] = \Drupal::currentUser()
+                ->id();
+        }// = 'administrator';
+        //xdebug_var_dump($form['field_performed_by']['widget']['#default_value']);exit();
+    } elseif ($form_id == 'concrete_finishers_checklist_complete_form') {
+
+        $form['actions']['submit']['#attributes']['class'][] = 'use-ajax submit-btn';
+        $form['actions']['submit']['#attributes']['data-dialog-type'][] = 'modal';
+        $form['actions']['submit']['#ajax'] = [
+            'callback' => 'Drupal\concrete_finishers\Form\ChecklistCompleteForm::ajaxNotesFormSubmit',
+            'event' => 'click',
+            'wrapper' => 'edit-output',
+            'progress' => [
+                'type' => 'throbber',
+                'message' => t('Saving'),
+            ],
+        ];
+        if (empty($form['field_performed_by']['widget']['#default_value'])) {
+            $form['field_performed_by']['widget']['#default_value'] = \Drupal::currentUser()
+                ->id();
+        }// = 'administrator';
+        //xdebug_var_dump($form['field_performed_by']['widget']['#default_value']);exit();
+    } elseif ($form_id == 'commerce_stock_location_add_form' || $form_id == 'commerce_stock_location_edit_form') {
+
+    }
+}
+
+/**
+ * Implements hook_entity_base_field_info().
+ *
+ * @param \Drupal\Core\Entity\EntityTypeInterface $entity_type
+ *
+ * @return array
+ */
+function concrete_finishers_entity_base_field_info(
+    \Drupal\Core\Entity\EntityTypeInterface $entity_type
+) {
+    $fields = [];
+
+    /*drupal_set_message($entity_type->id(), 'info');*/
+    if ($entity_type->getBundleLabel() == 'Commerce stock movement bundle') {
+
+        // Add a 'Highlight' base field to all node types.
+        $fields['location_to_id'] = \Drupal\Core\Field\BaseFieldDefinition::create('integer')
+            ->setLabel(t('Stock Location To ID'))
+            ->setDescription(t('The location id of a stock location where the stock is being transfered to'))
+            ->setSetting('unsigned', true)
+            ->setDisplayConfigurable('form', true)
+            ->setDisplayConfigurable('view', true);
+    } elseif ($entity_type->getBundleLabel() == "Commerce stock location bundle") {
+        $fields['location_type'] = \Drupal\Core\Field\BaseFieldDefinition::create('entity_reference')
+            ->setLabel(t('Location Type'))
+            ->setDescription(t('The name of the stock location.'))
+            ->setSettings(['target_type' => 'taxonomy_term'])
+            ->setSetting('handler_settings',
+                ['target_bundles' => ['location_types' => 'location_types']])
+            ->setDisplayOptions('view', [
+                'label' => 'above',
+            ])
+            ->setDisplayOptions('form', [
+                'type' => 'radios',
+                'weight' => -6,
+            ])
+            ->setDisplayConfigurable('form', true)
+            ->setDisplayConfigurable('view', true);
+    }
+
+    return $fields;
+}

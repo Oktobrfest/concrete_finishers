@@ -1,0 +1,3 @@
+action.configuration.new_client_action:
+  type: new_client_action
+  label: 'Take action after a new client is created'

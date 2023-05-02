@@ -1,0 +1,63 @@
+rules_proposal_sent:
+  label: 'A proposal has been sent'
+  category: 'Node'
+  context:
+    client:
+      type: 'entity:node'
+      label: 'Proposal sent to client'
+
+rules_proposal_viewed:
+  label: 'A proposal has been viewed by client'
+  category: 'Node'
+  context:
+    client:
+      type: 'entity:node'
+      label: 'Proposal viewed by client'
+
+rules_invoice_viewed:
+  label: 'An invoice has been viewed by client'
+  category: 'Node'
+  context:
+    client:
+      type: 'entity:node'
+      label: 'Invoice viewed by client'
+
+rules_contract_signed:
+  label: 'The contract has been signed by the client'
+  category: 'Node'
+  context:
+    client:
+      type: 'entity:node'
+      label: 'The contract has been signed by the client'
+
+rules_service_scheduled:
+  label: 'The service has been scheduled with the client'
+  category: 'Node'
+  context:
+    client:
+      type: 'entity:node'
+      label: 'The service has been scheduled with the client'
+
+rules_service_finished:
+  label: 'The work has been completed'
+  category: 'Node'
+  context:
+    client:
+      type: 'entity:node'
+      label: 'The service has been scheduled with the client'
+
+rules_invoice_sent:
+  label: 'Invoice has been sent to the client'
+  category: 'Node'
+  context:
+    client:
+      type: 'entity:node'
+      label: 'Invoice has been sent to the client'
+
+rules_invoice_paid:
+  label: 'Invoice has been paid by the client'
+  category: 'Node'
+  context:
+    client:
+      type: 'entity:node'
+      label: 'Invoice has been paid by the client'

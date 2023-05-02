@@ -1,0 +1,240 @@
+concrete_finishers.esign:
+  path: '/esign/{entity_id}/sign'
+  defaults:
+      _controller: '\Drupal\concrete_finishers\Controller\ConcreteController::esignSign'
+      _title: 'Proposal Signature'
+  requirements:
+      _permission: 'access content'
+
+concrete_finishers.esignComplete:
+  path: '/esign/{entity_id}/complete'
+  defaults:
+      _controller: '\Drupal\concrete_finishers\Controller\ConcreteController::esignComplete'
+      _title: 'Proposal Signature'
+  requirements:
+      _permission: 'access content'
+
+concrete_finishers.edit:
+  path: '/tools/{entity_id}/test'
+  defaults:
+      _controller: '\Drupal\concrete_finishers\Controller\ConcreteController::test'
+      _title: 'Test'
+  requirements:
+      _permission: 'access content'
+
+
+concrete_finishers.esignPreview:
+  path: '/esign/{entity_id}/preview'
+  defaults:
+      _controller: '\Drupal\concrete_finishers\Controller\ConcreteController::esignPreview'
+      _title: 'Proposal Signature'
+  requirements:
+      _permission: 'access content'
+
+concrete_finishers.sendProposal:
+  path: '/esign/{entity_id}/send-proposal'
+  defaults:
+      _controller: '\Drupal\concrete_finishers\Controller\ConcreteController::sendProposal'
+      _title: 'Send Proposal'
+  requirements:
+      _permission: 'access content'
+
+concrete_finishers.updateProposal:
+  path: '/esign/{entity_id}/update-proposal'
+  defaults:
+      _controller: '\Drupal\concrete_finishers\Controller\ConcreteController::updateProposal'
+      _title: 'Update Proposal'
+  requirements:
+      _permission: 'access content'
+
+concrete_finishers.esignPrint:
+  path: '/esign/{entity_id}/print'
+  defaults:
+      _controller: '\Drupal\concrete_finishers\Controller\ConcreteController::esignPrint'
+      _title: 'Proposal Signature'
+  requirements:
+      _permission: 'access content'
+
+concrete_finishers.payWithCreditCard:
+  path: '/invoice/{entity_id}/pay-with-credit-card'
+  defaults:
+      _controller: '\Drupal\concrete_finishers\Controller\ConcreteController::payWithCreditCard'
+      _title: 'Credit Card Payment'
+  requirements:
+      _permission: 'access content'
+
+concrete_finishers.payWithBankAcount:
+  path: '/invoice/{entity_id}/pay-with-bank-account'
+  defaults:
+      _controller: '\Drupal\concrete_finishers\Controller\ConcreteController::payWithBankAccount'
+      _title: 'Bank Account Payment'
+  requirements:
+      _permission: 'access content'
+
+concrete_finishers.createInvoice:
+  path: '/invoice/{entity_id}/create'
+  defaults:
+      _controller: '\Drupal\concrete_finishers\Controller\ConcreteController::createInvoice'
+      _title: 'Create Invoice'
+  requirements:
+      _permission: 'access content'
+
+concrete_finishers.createProposal:
+  path: '/client/{entity_id}/create-proposal'
+  defaults:
+      _controller: '\Drupal\concrete_finishers\Controller\ConcreteController::createProposal'
+      _title: 'Create Proposal'
+  requirements:
+      _permission: 'access content'
+
+concrete_finishers.sendInvoice:
+  path: '/invoice/{entity_id}/send-invoice'
+  defaults:
+      _controller: '\Drupal\concrete_finishers\Controller\ConcreteController::sendInvoice'
+      _title: 'Send Invoice'
+  requirements:
+      _permission: 'access content'
+
+concrete_finishers.hideTask:
+  path: '/task/{entity_id}/hide'
+  defaults:
+      _controller: '\Drupal\concrete_finishers\Controller\TaskController::hideTask'
+      _title: 'Hide Task'
+  requirements:
+      _permission: 'access content'
+
+concrete_finishers.completeTask:
+  path: '/task/{entity_id}/complete'
+  defaults:
+      _controller: '\Drupal\concrete_finishers\Controller\TaskController::completeTask'
+      _title: 'Complete Task'
+  requirements:
+      _permission: 'access content'
+
+concrete_finishers.startDateForm:
+  path: '/task/{entity_id}/set-start-date'
+  defaults:
+    _title: 'Set Start Date'
+    _controller: '\Drupal\concrete_finishers\Controller\TaskController::getStartDateForm'
+  requirements:
+    _permission: 'access content'
+
+concrete_finishers.completedDateForm:
+  path: '/task/{entity_id}/set-completed-date'
+  defaults:
+    _title: 'Set Completed Date'
+    _controller: '\Drupal\concrete_finishers\Controller\TaskController::getCompletedDateForm'
+  requirements:
+    _permission: 'access content'
+
+concrete_finishers.sendClosureEmail:
+  path: '/task/{entity_id}/send-closure-email'
+  defaults:
+    _title: 'Send Closure Email'
+    _controller: '\Drupal\concrete_finishers\Controller\TaskController::sendClosureEmail'
+  requirements:
+    _permission: 'access content'
+
+concrete_finishers.checklistNotesForm:
+  path: '/checklist/{entity_id}/edit-notes'
+  defaults:
+    _title: 'Edit Checklist Notes'
+    _controller: '\Drupal\concrete_finishers\Controller\ChecklistController::getNotesForm'
+  requirements:
+    _permission: 'update client checklist'
+
+concrete_finishers.checklistSubmitForm:
+  path: '/checklist/{entity_id}/submit-notes'
+  defaults:
+    _title: 'Submit Checklist Notes'
+    _controller: '\Drupal\concrete_finishers\Controller\ChecklistController::submitNotesForm'
+  requirements:
+    _permission: 'update client checklist'
+
+concrete_finishers.submitCompleteForm:
+  path: '/checklist/{entity_id}/complete'
+  defaults:
+    _title: 'Complete Checklist Item'
+    _controller: '\Drupal\concrete_finishers\Controller\ChecklistController::submitCompleteForm'
+  requirements:
+    _permission: 'update client checklist'
+
+concrete_finishers.createChecklist:
+  path: '/checklist/{entity_id}/create-checklist'
+  defaults:
+    _title: 'Create Checklist Item'
+    _controller: '\Drupal\concrete_finishers\Controller\ChecklistController::createNewClientChecklist'
+  requirements:
+    _permission: 'access content'
+
+concrete_finishers.clientList:
+  path: '/api/clients'
+  defaults:
+    _title: 'Client List'
+    _controller: '\Drupal\concrete_finishers\Controller\InventoryController::getClientList'
+  requirements:
+    _permission: 'access content'
+
+concrete_finishers.clientDetails:
+  path: '/api/clients/{entity_id}'
+  defaults:
+    _title: 'Client Details'
+    _controller: '\Drupal\concrete_finishers\Controller\InventoryController::getClientDetails'
+  requirements:
+    _permission: 'access content'
+
+concrete_finishers.getServices:
+  path: '/api/services'
+  defaults:
+    _title: 'Client List'
+    _controller: '\Drupal\concrete_finishers\Controller\InventoryController::getServices'
+  requirements:
+    _permission: 'access content'
+
+concrete_finishers.serviceDetails:
+  path: '/api/services/{entity_id}'
+  defaults:
+    _title: 'Client Details'
+    _controller: '\Drupal\concrete_finishers\Controller\InventoryController::getServiceDetails'
+  requirements:
+    _permission: 'access content'
+
+concrete_finishers.getMachines:
+  path: '/api/machines'
+  defaults:
+    _title: 'Client List'
+    _controller: '\Drupal\concrete_finishers\Controller\InventoryController::getMachines'
+  requirements:
+    _permission: 'access content'
+
+concrete_finishers.machineDetails:
+  path: '/api/machines/{entity_id}'
+  defaults:
+    _title: 'Client Details'
+    _controller: '\Drupal\concrete_finishers\Controller\InventoryController::getMachineDetails'
+  requirements:
+    _permission: 'access content'
+
+concrete_finishers.getMaterials:
+  path: '/api/materials'
+  defaults:
+    _title: 'Client List'
+    _controller: '\Drupal\concrete_finishers\Controller\InventoryController::getMaterials'
+  requirements:
+    _permission: 'access content'
+
+concrete_finishers.materialDetails:
+  path: '/api/materials/{entity_id}'
+  defaults:
+    _title: 'Client Details'
+    _controller: '\Drupal\concrete_finishers\Controller\InventoryController::getMaterialDetails'
+  requirements:
+    _permission: 'access content'
+
+concrete_finishers.updateClientInventory:
+  path: '/client/{entity_id}/update-client-inventory'
+  defaults:
+    _title: 'Client Details'
+    _controller: '\Drupal\concrete_finishers\Controller\InventoryController::updateClientInventory'
+  requirements:
+    _permission: 'access content'
